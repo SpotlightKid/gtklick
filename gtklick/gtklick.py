@@ -10,29 +10,43 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
+from __future__ import absolute_import, print_function, unicode_literals
 
-import pygtk
-pygtk.require('2.0')
-import gtk
-import gtk.glade
-import gobject
-
+import builtins
 import getopt
-import sys
-import os.path
-import weakref
-
 import gettext
 import locale
-import __builtin__
-__builtin__._ = gettext.gettext
+import os
+import sys
+import weakref
 
-import klick_backend
-import gtklick_config
-import main_window
-import profiles_pane
-import preferences_dialog
-import misc
+builtins._ = gettext.gettext
+
+try:
+    from gi import pygtkcompat
+except ImportError:
+    import pygtk
+    pygtk.require('2.0')
+else:
+    pygtkcompat.enable()
+    pygtkcompat.enable_gtk(version='3.0')
+
+import gobject
+import gtk
+
+try:
+    import gtk.glade
+    HAVE_GLADE = True
+except ImportError:
+    from gi.repository import Gtk
+    HAVE_GLADE = False
+
+from . import klick_backend
+from . import gtklick_config
+from . import main_window
+from . import misc
+from . import preferences_dialog
+from . import profiles_pane
 
 
 class GTKlick:
@@ -43,9 +57,12 @@ class GTKlick:
             # don't crash when run with unsupported locale
             pass
 
-        for m in gettext, gtk.glade:
-            m.bindtextdomain('gtklick', locale_dir)
-            m.textdomain('gtklick')
+        gettext.bindtextdomain('gtklick', locale_dir)
+        gettext.textdomain('gtklick')
+
+        if HAVE_GLADE:
+            gtk.glade.bindtextdomain('gtklick', locale_dir)
+            gtk.glade.textdomain('gtklick')
 
         self.config = None
         self.parse_cmdline(args)
@@ -58,7 +75,7 @@ class GTKlick:
                 self.restore_config()
             else:
                 self.query_config()
-        except klick_backend.KlickBackendError, e:
+        except klick_backend.KlickBackendError as e:
             self.error_message(e.msg)
             sys.exit(1)
 
@@ -92,24 +109,37 @@ class GTKlick:
                 elif opt == '-h':
                     self.print_help()
                     sys.exit(0)
-        except getopt.GetoptError, e:
+        except getopt.GetoptError as e:
             sys.exit(e.msg)
 
     def print_help(self):
-        print _("Usage:\n" \
+        print(_("Usage:\n" \
                 "  gtklick [ options ]\n" \
                 "\n" \
                 "Options:\n" \
                 "  -o port   OSC port to start klick with\n" \
                 "  -q port   OSC port of running klick instance to connect to\n" \
                 "  -r port   OSC port to be used for gtklick\n" \
-                "  -h        show this help")
+                "  -h        show this help"))
 
     # create windows, config, and klick backend
     def setup(self, share_dir):
-        self.wtree = gtk.glade.XML(os.path.join(share_dir, 'gtklick.glade'))
+        if HAVE_GLADE:
+            self.wtree = gtk.glade.XML(os.path.join(share_dir, 'gtklick.glade'))
+        else:
+            self.wtree = gtk.Builder()
+            self.wtree.add_from_file(os.path.join(share_dir, 'gtklick.ui'))
+
         # explicitly call base class method, because get_name() is overridden in AboutDialog. stupid GTK...
-        self.widgets = dict([(gtk.Widget.get_name(w), w) for w in self.wtree.get_widget_prefix('')])
+        if HAVE_GLADE:
+            self.widgets = dict([(gtk.Widget.get_name(w), w)
+                                 for w in self.wtree.get_widget_prefix('')])
+        else:
+            self.widgets = dict([(w.get_name(w), w)
+                                 for w in self.wtree.get_objects()
+                                 if isinstance(w, gtk.Widget)])
+            print(self.widgets)
+
 
         self.config = gtklick_config.GTKlickConfig()
 
@@ -197,7 +227,7 @@ class GTKlick:
         return True
 
     def fallback(self, path, args, types, src):
-        print "message not handled:", path, args, src.get_url()
+        print("message not handled:", path, args, src.get_url())
 
     def error_message(self, msg):
         m = gtk.MessageDialog(self.wtree.get_widget('window_main'), 0, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, msg)

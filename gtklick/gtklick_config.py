@@ -9,11 +9,22 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
-import ConfigParser
-import os.path
-import gobject
+from __future__ import unicode_literals
+
+import os
 import re
-import itertools
+
+try:
+    from itertools import izip as zip
+except:
+    pass
+
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
+
+import gobject
 
 
 def make_property(section, option, type_):
@@ -65,7 +76,7 @@ class GTKlickConfig(object):
     def __init__(self):
         self.cfgfile = os.path.expanduser('~/.gtklickrc')
 
-        self.parser = ConfigParser.SafeConfigParser()
+        self.parser = configparser.SafeConfigParser()
 
         self.parser.add_section('preferences')
         self.parser.add_section('view')
@@ -133,11 +144,11 @@ class GTKlickConfig(object):
 
     def set_profiles(self, profiles):
         # store all profiles in config parser
-        for n, p in itertools.izip(itertools.count(), profiles):
+        for n, p in zip(itertools.count(), profiles):
             s = 'profile_%d' % n
             try:
                 self.parser.add_section(s)
-            except ConfigParser.DuplicateSectionError:
+            except configparser.DuplicateSectionError:
                 pass
             self.parser.set(s, 'name', p.name)
             self.parser.set(s, 'tempo', str(p.tempo))

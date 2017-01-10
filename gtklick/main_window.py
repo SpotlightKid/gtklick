@@ -9,16 +9,22 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
+from __future__ import absolute_import, unicode_literals
+
+import math
+import time
+
+try:
+    from itertools import izip as zip
+except:
+    pass
+
 import gtk
 import gtk.keysyms
 
-import time
-import math
-import itertools
-
-from klick_backend import make_method
-from misc import gui_callback, osc_callback
-import misc
+from . import misc
+from .klick_backend import make_method
+from .misc import gui_callback, osc_callback
 
 
 class MainWindow:
@@ -394,7 +400,7 @@ class MainWindow:
             # invalid pattern, use default
             pattern = self.default_pattern(config.beats)
         changed = pattern != config.pattern
-        for p, b in itertools.izip(pattern, self.pattern_buttons):
+        for p, b in zip(pattern, self.pattern_buttons):
             b.set_state('.xX'.index(p))
         config.pattern = pattern
         if changed:

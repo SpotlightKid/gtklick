@@ -9,13 +9,15 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
-import gtk
-import gobject
+from __future__ import absolute_import, unicode_literals
 
 import cgi
 
-import gtklick_config
-import misc
+import gobject
+import gtk
+
+from . import gtklick_config
+from . import misc
 
 
 class ProfilesPane:

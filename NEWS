@@ -1,3 +1,8 @@
+2016-03-04: (unreleased)
+
+  * Ported to Python 3
+  * Ported to GTK+ 3 / PyGObject using pygtkcompat
+
 2010-02-14: gtklick 0.6.4
 
   * Updated spanish translation.

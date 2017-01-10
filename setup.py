@@ -68,7 +68,8 @@ setup(
     scripts = ['bin/gtklick'],
     packages = ['gtklick'],
     data_files = [
-        ('share/gtklick', ['share/gtklick.glade', 'share/gtklick.png']),
+        ('share/gtklick', ['share/gtklick.glade', 'share/gtklick.png',
+                           'share/gtklick.ui']),
         ('share/applications', ['share/gtklick.desktop']),
         ('share/pixmaps', ['share/gtklick.xpm', 'share/gtklick.png']),
     ],

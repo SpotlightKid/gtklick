@@ -9,12 +9,19 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
-import gtk
-import gtk.keysyms
-import gobject
+from __future__ import print_function, unicode_literals
 
 import inspect
-import weakref, new
+import weakref
+
+try:
+    from new import instancemethod
+except ImportError:
+    from types import MethodType as instancemethod
+
+import gobject
+import gtk
+import gtk.keysyms
 
 
 block = False
@@ -38,7 +45,7 @@ def osc_callback(f):
             gtk.gdk.threads_enter()
             block = True
 
-            #print args[0], args[1]
+            #print(args[0], args[1])
 
             # call function with the correct number of arguments, to allow osc callbacks to omit
             # some of pyliblo's callback arguments
@@ -67,10 +74,10 @@ def do_quietly(f):
 
 class weakref_method:
     def __init__(self, f):
-        self.inst = weakref.ref(f.im_self)
-        self.func = f.im_func
+        self.inst = weakref.ref(getattr(f, '__self__', f.im_self))
+        self.func = getattr(f, '__func__', f.im_func)
     def __call__(self, *args, **kwargs):
-        f = new.instancemethod(self.func, self.inst(), self.inst().__class__)
+        f = instancemethod(self.func, self.inst(), self.inst().__class__)
         return f(*args, **kwargs)
 
 

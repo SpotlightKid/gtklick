@@ -9,13 +9,15 @@
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 
-import gtk
+from __future__ import absolute_import, unicode_literals
 
 import math
 
-from klick_backend import make_method
-from misc import gui_callback, osc_callback
-import misc
+import gtk
+
+from . import misc
+from .klick_backend import make_method
+from .misc import gui_callback, osc_callback
 
 
 class PreferencesDialog:
